@@ -1,0 +1,246 @@
+---
+title: Has Nikola Jokic done enough to earn back-to-back NBA MVP awards?
+author: Cole Peterson
+date: '2022-04-07'
+slug: has-nikola-jokic-done-enough-to-earn-back-to-back-nba-mvp-awards
+categories: []
+tags: []
+---
+
+The MVP race in the NBA is the closest it's ever been. In recent weeks it has ultimately been narrowed down to three very polarizing candidates.
+
+Giannis Antetokounmpo, Joel Embiid and Nikola Jokic.
+
+Four players have been repeat winners of the NBA's most prestige award over the last 13 years. The Joker looks to be the fifth, and perhaps the most impressive player analytically in recent memory.
+
+Lets take a look at how he's getting it done.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(ggalt)
+library(ggtext)
+library(ggrepel)
+library(waffle)
+library(gt)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+players <- read_csv("data/NBA All Totals.csv")
+
+qualifiedplayers <- players %>%
+  filter(G > 58)
+
+average <- players %>%
+  filter(G > 1)
+
+mvpcandidates <- c("Nikola Jokić", "Joel Embiid", "Giannis Antetokounmpo", "Luka Dončić", "Devin Booker")
+
+mvp <- players %>%
+  filter(Player %in% mvpcandidates)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot() + 
+  geom_point(data=average, aes(x=PTS, y=TRB, size=AST), color = "grey", alpha = .15) +
+  geom_point(data=qualifiedplayers, aes(x=PTS, y=TRB, size=AST), color = "black", alpha = .3) +
+  geom_point(data=mvp, aes(x=PTS, y=TRB, size=AST), color = "red") +
+  scale_size(range = c(1, 7.5), name="Assists") +
+  geom_text(aes(x=1635, y=972, label="Nikola Jokic"), color="#0E2240") +
+  geom_text(aes(x=1482, y=750, label="Giannis Antetokounmpo"), color="#00471B") +
+  geom_text(aes(x=1970, y=670, label="Joel Embiid"), color="#ED174C") +
+  geom_text(aes(x=1910, y=486, label="Luka Doncic"), color="#00538C") +
+  geom_text(aes(x=1885, y=266, label="Devin Booker"), color="#E56020") +
+  geom_vline(xintercept = 1097.474) + 
+  geom_hline(yintercept = 386.6154) +
+  labs(
+    x="Total Points On Season",
+    y="Total Rebounds On Season",
+    title="Nikola Jokic Is Truly The Jack Of All Trades", 
+    subtitle="Not only does the Joker score and rebound at an elite level, he's arguably the NBA's best passing big man.", 
+    caption="Source: NBA Sports Reference | By Cole Peterson") + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(size = 18, face = "bold"),
+    axis.title = element_text(size = 8), 
+    plot.subtitle = element_text(size=10), 
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot"
+    )
+```
+
+On top of being impressive statistically, he leads the MVP candidates with the most double-doubles and triple-doubles. 
+
+Jokic paces the NBA with 19 triple doubles and is the only true center in the entire league with more than two.
+
+The Serbian has recorded a double-double in 89 percent of the games he's played in, which marks the highest percentage in his career.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+nj <- c("Double-Doubles"=66, "Triple-Doubles"= 19)
+je <- c("Double-Doubles"=45, "Triple-Doubles"= 2, 38)
+ga <- c("Double-Doubles"=45, "Triple-Doubles"= 4, 36)
+
+iron(
+ waffle(nj, 
+        rows = 5,
+        colors = c("#0E2240", "#FEC524")) +
+        labs(
+     x="Nikola Jokic",
+     title="Jokic Nearly Doubling The Others", 
+     subtitle="The Serbian emerges head and shoulders above the compeitition with the most \n double-doubles and triple-doubles in the NBA.") + 
+   theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 10),
+    axis.title.y = element_blank(),
+    plot.title.position = "plot"
+        ),
+ waffle(je, 
+        rows = 5,
+        colors = c("#006BB6", "#ED174C", "white")) +
+        labs(
+     x = "Joel Embiid",
+        ),
+ waffle(ga, 
+        rows = 5,
+        colors = c("#00471B", "#EEE1C6", "white")) +
+        labs(
+     x = "Giannis Antetokounmpo\n1 square = 1 game",
+     caption="Source: NBA Sports Reference | Graphic by Cole Peterson"
+     ) + 
+   theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 10),
+    axis.title.y = element_blank(),
+    plot.caption.position = "plot"
+        )
+)
+```
+
+Now, lets get into some advanced statistics.
+
+Jokic has been exceptional in his play, and his advanced metrics back up the MVP level season he's having.
+
+The Joker leads the league in four of the five major categories for advanced stats and is on pace for numerous career highs. 
+
+On top of that, not only does Jokic have the lowest usage rate among the three MVP finalists, but he also holds the highest value over replacement of all three.
+
+Here's a comparison of where the MVP candidates stack up compared to Jokic.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+players <- read_csv("Data/NBA ADV Update 2.csv")
+
+mvpcandidates <- c("Nikola Jokić", "Joel Embiid", "Giannis Antetokounmpo", "Luka Dončić", "LeBron James", "Devin Booker", "Kevin Durant", "Stephen Curry")
+
+mvp <- players %>%
+  filter(Player %in% mvpcandidates)
+
+advancedmvp <- mvp %>%
+  select(Player, G, `USG%`,`VORP`, `WS`, PER, `TS%`) %>%
+  arrange(desc(`VORP`))
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+advancedmvp %>% 
+  gt() %>% 
+  cols_label(
+    Player = "Player",
+    G = "Games Played",
+    PER = "Player Efficeincy Rating",
+    `USG%` = "Usage Rate",
+    `TS%` = "True Shooting",
+    `WS` = "Win Shares",
+    `VORP` = "Value Over Replacement",
+  ) %>%
+  tab_header(
+    title = "The Joker is putting up numbers we haven't seen before",
+    subtitle = "Jokic leads the league in four of the five major advanced data categories, and has a NBA leading value over replacement value."
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "black", weight = "bold", align = "left"),
+    locations = cells_title("title")
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "black", align = "left"),
+    locations = cells_title("subtitle")
+  ) %>%
+  tab_source_note(
+    source_note = md("**By:** Cole Peterson  |  **Source:** NBA Sports Reference")
+  ) %>%
+  tab_style(
+     locations = cells_column_labels(columns = everything()),
+     style = list(
+       cell_borders(sides = "bottom", weight = px(3)),
+       cell_text(weight = "bold", size=12)
+     )
+  ) %>%
+  opt_row_striping() %>% 
+  opt_table_lines("none") %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "#0E2240"),
+      cell_text(color = "#FEC524")
+      ),
+    locations = cells_body(
+      rows = Player == "Nikola Jokić")
+  ) %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "#00471B"),
+      cell_text(color = "#EEE1C6")
+      ),
+    locations = cells_body(
+      rows = Player == "Giannis Antetokounmpo")
+  ) %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "#ED174C"),
+      cell_text(color = "#002B5C")
+      ),
+    locations = cells_body(
+      rows = Player == "Joel Embiid")
+  )
+```
+
+Now, a deeper dive into one particular advanced metric. Box plus/minus.
+
+Although often criticized for his lack of defense, Jokic has turned in the highest defensive box plus/minus. That means per 100 possessions, the Nuggets are holding opponents to nearly five points less on average with Jokic on the floor.
+
+Flipping the script, the Joker has been a menace offensively as well, with a 9.8 offensive box plus minus. Not only is he holding opposing teams in check defensively, but he's running roughshod over their defense.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+players <- read_csv("Data/NBA ADV Update 2.csv")
+
+mvpcandidates <- c("Nikola Jokić", "Joel Embiid", "Giannis Antetokounmpo", "Luka Dončić", "LeBron James", "Devin Booker", "Kevin Durant", "Stephen Curry")
+
+mvp <- players %>%
+  filter(Player %in% mvpcandidates) 
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot() + 
+  geom_dumbbell(
+    data=mvp, 
+    aes(y=reorder(Player, `DBPM`), x=`DBPM`, xend=`OBPM`),
+    size = 2,
+    colour = "grey",
+    colour_x = "green",
+    colour_xend = "red") +
+  labs(
+    x="Box Plus/Minus", 
+    y="Player", 
+    title="Jokic is dominating the box", 
+    subtitle="Not only has the reigning MVP been dominating on the offensive end with the highest <span style = 'color:red;'>OBPM</span>, he's also at the top on defense in terms of <span style = 'color:green;'>DBPM</span>.", 
+    caption="Source: NBA Sports Reference | By Cole Peterson"
+    ) +
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(size = 20, face = "bold"),
+    axis.title = element_text(size = 8), 
+    plot.subtitle = element_textbox_simple(size=10), 
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot"
+    ) 
+```
+
+The road to Jokic's second-straight MVP is less a matter of if, but rather when. His stats speak for themselves and he is currently in line to be the fifth back-to-back MVP in the past 13 years.
+
+Note: The code that made these graphics can be found here.
