@@ -1,0 +1,237 @@
+---
+title: How the Cubs broke the 108-year drought in 2016
+author: Cole Peterson
+date: '2022-04-21'
+slug: how-the-cubs-broke-the-108-year-drought-in-2016
+categories: []
+tags: []
+---
+
+108 years.
+
+That's how long it had been  since the Chicago Cubs won their last MLB World Series trophy. After over a century, the "Lovable losers" knocked off the then Cleveland Indians to take the series 4-3 and hoist the ultimate prize.
+
+But how did they do it?
+
+Sure they had the NL MVP and Cy Young in Kris Bryant and Jake Arrieta. But baseball is a team sport, so let's take a deeper dive into the Cubs championship run.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+library(tidyverse)
+library(gt)
+library(cowplot)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+offensivestats <- read_csv("Data/MLB Offensive.csv")
+
+fourteams <- c("Chicago Cubs", "Cleveland Indians", "Boston Red Sox", "Los Angeles Dodgers")
+
+references <- offensivestats %>%
+  filter(Tm %in% fourteams)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ggplot() + 
+  geom_point(data=offensivestats, aes(x=BA, y=OPS, size=BB), color = "black", alpha = .5) +
+  geom_point(data=references, aes(x=BA, y=OPS, size=BB), color = "red", alpha = 1) +
+  scale_size(range = c(1, 7.5), name="Walks") +
+  geom_text(aes(x=.254, y=.7805, label="Chicago Cubs"), color="#0E2240") +
+  geom_text(aes(x=.269, y=.758, label="Cleveland Indians"), color="#00471B") +
+  geom_text(aes(x=.275, y=.81, label="Boston Red Sox"), color="#ED174C") +
+  geom_text(aes(x=.243, y=.72, label="Los Angeles Dodgers"), color="#00538C") +
+  labs(
+    x="Team Batting Average",
+    y="Team On Base Plus Slugging Percentage",
+    title="The Cubs Walked Their Way Into A Championship", 
+    subtitle="While ranking middle of the pack in team batting average, Chicago found other ways to get it done offensively.", 
+    caption="Source: Baseball Reference | By Cole Peterson") + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(size = 18, face = "bold"),
+    axis.title = element_text(size = 8), 
+    plot.subtitle = element_text(size=10),
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot"
+    )
+```
+
+Even though the Cubs knew how to get on base, an area of the game that didn't get mentioned as much that season was defense.
+
+Their fielding was on a different level in the 2016 season, as they saved nearly 40 more runs than the next closest team because of their defensive play.
+
+The Cubs defensive efficiency was through the roof, and they knew how to limit scores and make opponents grind for every singles run.
+
+Two Cubs also took home two Golden Glove awards in 2016, Anthony Rizzo and Jason Heyward.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+defensivestats <- read_csv("Data/MLB Defense.csv")
+
+ds <- c("Chicago Cubs", "Cleveland Indians", "Los Angeles Dodgers", "Texas Rangers", "Boston Red Sox", "Washington Nationals")
+
+divisionteams <- defensivestats %>%
+  filter(Tm %in% ds)
+
+divisiondefensive <- divisionteams %>%
+  select(Tm, `RA/G`, `Fld%`, `DefEff▼`, Rtot, Rdrs, DP) %>%
+  arrange(`RA/G`)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+divisiondefensive %>% 
+  gt() %>% 
+  cols_label(
+    Tm = "Team",
+    `Fld%` = "Fielding Percentage",
+    `DefEff▼` ="Defensive Efficiency",
+    Rtot = "Runs Players Were Worth On Defense",
+    Rdrs = "Defensive Runs Saved Above Average",
+    `RA/G` = "Runs Allowed Per Game",
+    DP = "Double Plays",
+  ) %>%
+  tab_header(
+    title = "Chicago got it done defensively",
+    subtitle = "The Cubs saved more runs than any other team in baseball by nearly 40, while boasting the highest defensive efficiency."
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "black", weight = "bold", align = "left"),
+    locations = cells_title("title")
+  ) %>% 
+  tab_style(
+    style = cell_text(color = "black", align = "left"),
+    locations = cells_title("subtitle")
+  ) %>%
+  tab_source_note(
+    source_note = md("**By:** Cole Peterson  |  **Source:** Baseball Reference")
+  ) %>%
+  tab_style(
+     locations = cells_column_labels(columns = everything()),
+     style = list(
+       cell_borders(sides = "bottom", weight = px(3)),
+       cell_text(weight = "bold", size=12)
+     )
+    ) %>%
+  opt_row_striping() %>% 
+  opt_table_lines("none") %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "#0E3386"),
+      cell_text(color = "#CC3433")
+      ),
+    locations = cells_body(
+      rows = Tm == "Chicago Cubs")
+  ) %>%
+  tab_style(
+    style = list(
+      cell_fill(color = "#E31937"),
+      cell_text(color = "#0C2340")
+      ),
+    locations = cells_body(
+      rows = Tm == "Cleveland Indians")
+  )
+```
+
+But how could one forget about pitching.
+
+The Cubs may have had one of the best pitching staffs in the team's long history during their championship run.
+
+Anchored by a rotation of Kyle Hendricks, Jon Lester, John Lackey, and Arrieta, Chicago performed at an elite level on the mound in 2016.
+
+Multiple players ranked in the top 10 in some of the most important pitching categories, namely earned run average and opponent batting average.
+
+They kept the opposition guessing all season en route to a dramatic World Series victory.
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+mlbadvancedpitching <- read_csv("Data/MLB Advanced Individual Pitching.csv")
+regularpitching <- read_csv("Data/MLB PItching 2016.csv") 
+
+mlbpitchingrenamed <- mlbadvancedpitching %>%
+  rename(
+    Rank=...1,
+    Player=...2,
+    Age=...3,
+    Team=...4,
+    BA=...5,
+    OBP=...6,
+    SLG=...7,
+    OPS=...8,
+    BAbip=...9,
+    `HR%`=...10,
+    `SO%`=...11,
+    `BB%`=...12,
+    EV=...13,
+    `HardH%`=...14
+  )  %>% mutate(Player = gsub("\\*", "", Player))
+
+statswithoutgarbage <- mlbpitchingrenamed %>%
+  filter(Rank != "Rk" & Player != "Name")
+
+statswithnumbers <- statswithoutgarbage %>%
+  mutate_at(vars(-Player), as.numeric)
+
+regularpitchingrenamed <-regularpitching %>%
+  rename(
+    ERA=`ERA▲`,
+  ) %>% mutate(Name = gsub("\\*", "", Name))
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+topOppBA <- statswithnumbers %>% top_n(10, wt=-`BA`)
+
+topERA <- regularpitchingrenamed %>% top_n(10, wt=-`ERA`)
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+ja <- topOppBA %>% filter(Rank == "10")
+kh <- topOppBA %>% filter(Rank == "2")
+jl <- topOppBA %>% filter(Rank == "6")
+jla <- topOppBA %>% filter(Rank == "13")
+
+kh2 <- topERA %>% filter(Rk == "1")
+jl2 <- topERA %>% filter(Rk == "2")
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+bar1 <- ggplot() + 
+  geom_bar(data=topOppBA, aes(x=reorder(Player, -`BA`), weight=`BA`)) + 
+  geom_bar(data=ja, aes(x=reorder(Player, -`BA`), weight=`BA`), fill="#0E3386") + 
+  geom_bar(data=kh, aes(x=reorder(Player, -`BA`), weight=`BA`), fill="#0E3386") + 
+  geom_bar(data=jl, aes(x=reorder(Player, -`BA`), weight=`BA`), fill="#0E3386") + 
+  geom_bar(data=jla, aes(x=reorder(Player, -`BA`), weight=`BA`), fill="#0E3386") + 
+  coord_flip() +
+  labs(title = "Arrieta dominated the oppostion in his Cy Young season", subtitle= "Four of the top 10 lowest opponent batting average's belonged to the Cubs pitching staff in 2016.", x="", y="Opponent Batting Average") + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(size = 15, face = "bold"),
+    axis.title = element_text(size = 8), 
+    plot.subtitle = element_text(size=10), 
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot"
+    )
+
+bar2 <- ggplot() + 
+  geom_bar(data=topERA, aes(x=reorder(Name, -`ERA`), weight=`ERA`)) + 
+  geom_bar(data=kh2, aes(x=reorder(Name, -`ERA`), weight=`ERA`), fill="#CC3433") + 
+  geom_bar(data=jl2, aes(x=reorder(Name, -`ERA`), weight=`ERA`), fill="#CC3433") + 
+  coord_flip() +  
+  labs(title = "The Cubs whole rotation also limited earned runs", subtitle= "Chicago had the two lowest earned run averages with Hendricks and Lester dealing in the regular season.", x="", y="Earned Run Average", caption="Source: Baseball Reference | By Cole Peterson") + 
+  theme_minimal() + 
+  theme(
+    plot.title = element_text(size = 15, face = "bold"),
+    axis.title = element_text(size = 8), 
+    plot.subtitle = element_text(size=10), 
+    panel.grid.minor = element_blank(),
+    plot.title.position = "plot"
+    )
+```
+
+```{r message=FALSE, warning=FALSE, echo=FALSE}
+plot_grid(bar1, bar2, ncol=1)
+```
+
+It's been long overdue for the city of Chicago to get a World Series trophy, and the 2016 season will go down as one of the most notable MLB teams ever.
+
+They ended the curse of Steve Bartman and stopped the 108-year long drought. The Cubs did it through stellar defense and an elite pitching staff. Even though they did have the NL MVP and one of the highest on-base percentages as a team.
+
+Hopefully it won't be 108 more years till the next banner flies at Wrigley Field.
+
+Note: The code that made these graphics can be found here.
